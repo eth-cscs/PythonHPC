@@ -11,54 +11,6 @@ import sys
 import operators
 
 
-def ss_fill(x, val):
-    x.fill(val)
-
-
-def ss_copy(dst, src):
-    np.copyto(dst, src)
-
-
-def ss_norm2(x):
-    result = 0.
-    for xi in x:
-        result += xi*xi
-
-    return math.sqrt(result)
-
-
-def ss_scale(y, alpha, x):
-    for i, _ in enumerate(x):
-        y[i] = alpha*x[i]
-
-
-def ss_add_scaled_diff(y, x, alpha, l, r):
-    # computes y = x + alpha*(l-r)
-    # y, x, l and r are vectors
-    # alpha is a scalar
-    for i, _ in enumerate(x):
-        y[i] = x[i] + alpha*(l[i] - r[i])
-
-
-def ss_scaled_diff(y, alpha, l, r):
-    for i, _ in enumerate(l):
-        y[i] = alpha * (l[i] - r[i])
-
-
-def ss_dot(x, y):
-    return x @ y
-
-
-def ss_lcomb(y, alpha, x, beta, z):
-    for i, _ in enumerate(x):
-        y[i] = alpha*x[i] + beta*z[i]
-
-
-def ss_axpy(y, alpha, x):
-    for i, _ in enumerate(x):
-        y[i] += alpha*x[i]
-
-
 Ap = None
 r  = None
 p  = None
@@ -68,7 +20,7 @@ xold  = None
 Fxold = None
 
 
-def ss_cg(x, b, maxiters, tol, boundary, options, solution):
+def cg(x, b, maxiters, tol, boundary, options, solution):
     global Ap, r, p, v, Fx, Fxold, xold
 
     nx = options.nx
@@ -87,9 +39,9 @@ def ss_cg(x, b, maxiters, tol, boundary, options, solution):
     eps_inv = 1 / eps
 
     # initialize memory for temporary storage
-    ss_fill(Fx, 0.0)
-    ss_fill(Fxold, 0.0)
-    ss_copy(xold, x)
+    Fx.fill(0.0)
+    Fxold.fill(0.0)
+    np.copyto(xold, x)
 
     # matrix vector multiplication is approximated with
     # A*v = 1/epsilon * ( F(x+epsilon*v) - F(x) )
@@ -98,21 +50,20 @@ def ss_cg(x, b, maxiters, tol, boundary, options, solution):
     # we have to keep x so that we can compute the F(x+exps*v)
     operators.diffusion(x, Fxold, boundary, options, solution)
 
-    # v = x + epsilon*x
-    ss_scale(v, 1. + eps, x)
+    v = (1. + eps)*x
 
     # Fx = F(v)
     operators.diffusion(v, Fx, boundary, options, solution)
 
     # r = b - A*x
     # where A*x = (Fx-Fxold)/eps
-    ss_add_scaled_diff(r, b, -eps_inv, Fx, Fxold)
+    r = b - eps_inv*(Fx-Fxold)
 
     # p = r
-    ss_copy(p, r)
+    np.copyto(p, r)
 
     # rold = <r,r>
-    rold = ss_dot(r, r)
+    rold = r @ r
     rnew = rold
 
     if math.sqrt(rold) < tol:
@@ -120,28 +71,26 @@ def ss_cg(x, b, maxiters, tol, boundary, options, solution):
 
     for iter in range(maxiters):
         # Ap = A*p
-        ss_lcomb(v, 1.0, xold, eps, p)
+        v = xold + eps*p
         operators.diffusion(v, Fx, boundary, options, solution)
-        ss_scaled_diff(Ap, eps_inv, Fx, Fxold)
+
+        Ap = eps_inv*(Fx - Fxold)
 
         # alpha = rold / p'*Ap
-        dot = ss_dot(p, Ap)
+        dot = p @ Ap
         alpha = rold / dot
 
-        # x += alpha*p
-        ss_axpy(x, alpha, p)
+        x += alpha*p
 
-        # r -= alpha*Ap
-        ss_axpy(r, -alpha, Ap)
+        r -= alpha*Ap
 
         # find new norm
-        rnew = ss_dot(r, r)
+        rnew = r @ r
 
         if (math.sqrt(rnew) < tol):
             return (True, iter)
 
-        # p = r + (rnew/rold) * p
-        ss_lcomb(p, 1.0, r, rnew / rold, p)
+        p = r + (rnew/rold) * p
         rold = rnew
 
     print(f'ERROR: CG failed to converge after {iter} iterations, '

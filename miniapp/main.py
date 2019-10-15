@@ -8,6 +8,7 @@
 #   Ported to Python by Vasileios Karakasis, CSCS
 
 import collections
+import math
 import matplotlib
 import numpy as np
 import os
@@ -135,24 +136,23 @@ def main():
 
     # main timeloop
     for timestep in range(1, nt+1):
-        linalg.ss_copy(x_old, x_new)
+        np.copyto(x_old, x_new)
         converged = False
         for it in range(max_newton_iters):
             operators.diffusion(x_new, b, boundary, options, solution)
-            residual = linalg.ss_norm2(b)
-
+            residual = math.sqrt(b @ b)
             if residual < tolerance:
                 converged = True
                 break
 
-            cg_convered, iters = linalg.ss_cg(
+            cg_convered, iters = linalg.cg(
                 deltax, b, max_cg_iters, tolerance, boundary, options, solution
             )
             iters_cg += iters
             if not cg_convered:
                 break
 
-            linalg.ss_axpy(x_new, -1.0, deltax)
+            x_new -= deltax
 
         iters_newton += it + 1
         if not converged:
