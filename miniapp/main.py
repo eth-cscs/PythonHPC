@@ -116,7 +116,7 @@ def main():
     xc = 1.0 / 4.0
     yc = (ny - 1) * dx / 4
     radius = min(xc, yc) / 2.0
-    x_new = x_new.reshape(nx, ny)
+    x_new = x_new.reshape((nx, ny))
     for j in range(ny):
         y = (j - 1) * dx
         for i in range(nx):
