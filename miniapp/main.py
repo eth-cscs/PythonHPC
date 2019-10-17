@@ -12,7 +12,6 @@ import math
 import matplotlib
 import numpy as np
 import os
-import pylab
 import sys
 from datetime import datetime
 
@@ -170,24 +169,28 @@ def main():
     print(f'{iters_newton} newton iterations')
     print(f'Goodbye!')
 
-    # plot final output
-    if 'DISPLAY' not in os.environ:
-        matplotlib.use('Agg')
-
     xspace = np.linspace(0, 1, nx)
     yspace = np.linspace(0, 1, ny)
     X, Y = np.meshgrid(xspace, yspace)
 
+    if not 'DISPLAY' in os.environ:
+        matplotlib.use('Agg')
+
+    import matplotlib.pyplot as plt
+
     # number of contours we wish to see
     V = [-0.01, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.01]
-    pylab.contourf(X, Y, x_new.reshape((nx, ny)), V, alpha=.75, cmap='jet')
-    pylab.axes().set_aspect('equal')
-
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
     outfile = f'output_{nx}x{ny}_t={t}_steps={nt}.png'
-    print(f'saving solution in "{outfile}" ...')
-    pylab.savefig(outfile, dpi=72)
-    if 'DISPLAY'  in os.environ:
-        pylab.show()
+
+    print(f'generating solution figure in "{outfile}" ...')
+    ax.contourf(X, Y, x_new.reshape((nx, ny)), V, alpha=.75, cmap='jet')
+    ax.axes.set_aspect('equal')
+    fig.savefig(outfile, dpi=72)
+
+    if 'DISPLAY' in os.environ:
+        plt.show()
 
 
 if __name__ == '__main__':
