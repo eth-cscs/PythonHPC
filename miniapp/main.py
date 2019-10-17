@@ -123,8 +123,8 @@ def main():
             if (x-xc) * (x-xc) + (y-yc) * (y-yc) < radius*radius:
                 x_new[j, i] = 0.1
 
-    # reshape x_new back
-    x_new = x_new.reshape(nx*ny)
+    # restore x_new's shape
+    x_new = x_new.flatten()
 
     flops_bc = 0
     flops_diff = 0
@@ -171,7 +171,7 @@ def main():
 
     xspace = np.linspace(0, 1, nx)
     yspace = np.linspace(0, 1, ny)
-    X, Y = np.meshgrid(xspace, yspace)
+    X, Y = np.meshgrid(xspace, yspace, indexing='ij')
 
     if not 'DISPLAY' in os.environ:
         matplotlib.use('Agg')
