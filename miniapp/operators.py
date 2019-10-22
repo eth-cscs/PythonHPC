@@ -31,15 +31,15 @@ def diffusion(U, S, boundary, options, solution):
 
     # the east boundary
     i = iend
-    for j in range(jend):
+    for j in range(1, jend):
         S[i, j] = (-(4. + alpha) * U[i, j] + U[i-1, j] + U[i, j-1] + U[i, j+1] +
-                   alpha*x_old[i, j] + bndW[j] + dxs * U[i, j] * (1.0 - U[i, j]))
+                   alpha*x_old[i, j] + bndE[j] + dxs * U[i, j] * (1.0 - U[i, j]))
 
     # the west boundary
     i = 0
     for j in range(1, jend):
         S[i, j] = (-(4. + alpha) * U[i, j] + U[i-1, j] + U[i, j-1] + U[i, j+1] +
-                   alpha*x_old[i, j] + bndE[j] + dxs * U[i, j] * (1.0 - U[i, j]))
+                   alpha*x_old[i, j] + bndW[j] + dxs * U[i, j] * (1.0 - U[i, j]))
 
     # the NW corner
     j, i = jend, 0
