@@ -112,16 +112,15 @@ def main():
     # set the initial condition
     # a circle of concentration 0.1 centred at (xdim/4, ydim/4) with radius
     # no larger than 1/8 of both xdim and ydim
+    xspace = np.linspace(0, 1, nx)
+    yspace = np.linspace(0, 1, ny)
+    X, Y = np.meshgrid(xspace, yspace, indexing='ij')
+
     xc = 1.0 / 4.0
     yc = (ny - 1) * dx / 4
     radius = min(xc, yc) / 2.0
     x_new = x_new.reshape((nx, ny))
-    for j in range(ny):
-        y = (j - 1) * dx
-        for i in range(nx):
-            x = (i - 1) * dx
-            if (x-xc) * (x-xc) + (y-yc) * (y-yc) < radius*radius:
-                x_new[j, i] = 0.1
+    x_new[(X - xc) ** 2 + (Y - yc) ** 2 < radius * radius] = 0.1
 
     # restore x_new's shape
     x_new = x_new.flatten()
@@ -168,10 +167,6 @@ def main():
           f'{iters_cg/timespent} iters/second')
     print(f'{iters_newton} newton iterations')
     print(f'Goodbye!')
-
-    xspace = np.linspace(0, 1, nx)
-    yspace = np.linspace(0, 1, ny)
-    X, Y = np.meshgrid(xspace, yspace, indexing='ij')
 
     if not 'DISPLAY' in os.environ:
         matplotlib.use('Agg')
