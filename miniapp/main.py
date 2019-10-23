@@ -130,6 +130,7 @@ def main():
     flops_blas1 = 0
     iters_cg = 0
     iters_newton = 0
+    cg = linalg.ConjugateGradient(nx, ny, tolerance, max_cg_iters)
     timespent = datetime.now()
 
     # main timeloop
@@ -143,8 +144,8 @@ def main():
                 converged = True
                 break
 
-            cg_convered, iters = linalg.cg(
-                deltax, b, max_cg_iters, tolerance, boundary, options, solution
+            cg_convered, iters = cg.solve(
+                deltax, b, boundary, options, solution, operators.diffusion
             )
             iters_cg += iters
             if not cg_convered:
