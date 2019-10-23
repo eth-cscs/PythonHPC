@@ -8,91 +8,69 @@ import math
 import numpy as np
 import sys
 
-import operators
+from operators import diffusion
+
+# epsilon value use for matrix-vector approximation
+EPS = 1.0e-8
+EPS_INV = 1.0 / EPS
 
 
-Ap = None
-r  = None
-p  = None
-v  = None
-Fx = None
-xold  = None
-Fxold = None
+def cg(x, b, boundary, options, solution, tolerance, maxiters):
 
-
-def cg(x, b, maxiters, tol, boundary, options, solution):
-    global Ap, r, p, v, Fx, Fxold, xold
-
-    nx = options.nx
-    ny = options.ny
-
-    Ap = np.zeros(nx*ny) if Ap is None else Ap
-    r  = np.zeros(nx*ny) if r  is None else r
-    p  = np.zeros(nx*ny) if p  is None else p
-    v  = np.zeros(nx*ny) if v  is None else v
-    Fx = np.zeros(nx*ny) if Fx is None else Fx
-    Fxold = np.zeros(nx*ny) if Fxold is None else Fxold
-    xold  = np.zeros(nx*ny) if xold is None else xold
-
-    # epsilon value use for matrix-vector approximation
-    eps = 1e-8
-    eps_inv = 1 / eps
-
-    # initialize memory for temporary storage
-    Fx.fill(0.0)
-    Fxold.fill(0.0)
-    np.copyto(xold, x)
+    # Initialize temporary storage
+    Fx = np.zeros_like(x)
+    Fxold = np.zeros_like(x)
+    xold = np.copy(x)
 
     # matrix vector multiplication is approximated with
     # A*v = 1/epsilon * ( F(x+epsilon*v) - F(x) )
     #     = 1/epsilon * ( F(x+epsilon*v) - Fxold )
     # we compute Fxold at startup
     # we have to keep x so that we can compute the F(x+exps*v)
-    operators.diffusion(x, Fxold, boundary, options, solution)
+    diffusion(x, Fxold, boundary, options, solution)
 
-    v = (1. + eps)*x
+    v = (1. + EPS) * x
 
     # Fx = F(v)
-    operators.diffusion(v, Fx, boundary, options, solution)
+    diffusion(v, Fx, boundary, options, solution)
 
     # r = b - A*x
     # where A*x = (Fx-Fxold)/eps
-    r = b - eps_inv*(Fx-Fxold)
+    r = b - EPS_INV * (Fx - Fxold)
 
     # p = r
-    np.copyto(p, r)
+    p = np.copy(r)
 
     # rold = <r,r>
     rold = r @ r
     rnew = rold
 
-    if math.sqrt(rold) < tol:
+    if math.sqrt(rold) < tolerance:
         return (True, 0)
 
-    for iter in range(maxiters):
+    for it in range(maxiters):
         # Ap = A*p
-        v = xold + eps*p
-        operators.diffusion(v, Fx, boundary, options, solution)
+        v = xold + EPS * p
+        diffusion(v, Fx, boundary, options, solution)
 
-        Ap = eps_inv*(Fx - Fxold)
+        Ap = EPS_INV * (Fx - Fxold)
 
         # alpha = rold / p'*Ap
-        dot = p @ Ap
-        alpha = rold / dot
+        alpha = rold / (p @ Ap)
 
-        x += alpha*p
+        x += alpha * p
 
-        r -= alpha*Ap
+        r -= alpha * Ap
 
         # find new norm
         rnew = r @ r
 
-        if (math.sqrt(rnew) < tol):
-            return (True, iter)
+        if (math.sqrt(rnew) < tolerance):
+            return (True, it)
 
-        p = r + (rnew/rold) * p
+        p = r + (rnew / rold) * p
         rold = rnew
 
-    print(f'ERROR: CG failed to converge after {iter} iterations, '
+    print(f'ERROR: CG failed to converge after {it} iterations, '
           f'with residual {math.sqrt(rnew)}', file=sys.stderr)
-    return (False, iter)
+    return (False, it)
