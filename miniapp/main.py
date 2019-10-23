@@ -144,8 +144,9 @@ def main():
                 break
 
             cg_convered, iters = linalg.cg(
-                deltax, b, max_cg_iters, tolerance, boundary, options, solution
-            )
+                deltax, b, boundary, options, solution,
+                tolerance, max_cg_iters)
+
             iters_cg += iters
             if not cg_convered:
                 break
@@ -168,7 +169,7 @@ def main():
     print(f'{iters_newton} newton iterations')
     print(f'Goodbye!')
 
-    if not 'DISPLAY' in os.environ:
+    if 'DISPLAY' not in os.environ:
         matplotlib.use('Agg')
 
     import matplotlib.pyplot as plt
