@@ -42,7 +42,7 @@ def cg(x, b, boundary, options, solution, tolerance, maxiters):
     p = np.copy(r)
 
     # rold = <r,r>
-    rold = np.sum(r ** 2)
+    rold = r @ r
     rnew = rold
 
     if math.sqrt(rold) < tolerance:
@@ -63,7 +63,7 @@ def cg(x, b, boundary, options, solution, tolerance, maxiters):
         r -= alpha * Ap
 
         # find new norm
-        rnew = np.sum(r ** 2)
+        rnew = r @ r
 
         if (math.sqrt(rnew) < tolerance):
             return (True, it)
