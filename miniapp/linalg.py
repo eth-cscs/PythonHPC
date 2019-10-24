@@ -5,17 +5,19 @@
 # Ported to Python by Vasileios Karakasis, CSCS
 
 import math
+import numba
 import numpy as np
 import sys
 
-from operators import diffusion
+import operators
 
 # epsilon value use for matrix-vector approximation
 EPS = 1.0e-8
 EPS_INV = 1.0 / EPS
 
 
-def cg(x, b, boundary, options, solution, tolerance, maxiters):
+@numba.jit(nopython=True, cache=True)
+def cg(x, x_old, b, boundary, options, tolerance, maxiters):
 
     # Initialize temporary storage
     Fx = np.zeros_like(x)
@@ -27,12 +29,12 @@ def cg(x, b, boundary, options, solution, tolerance, maxiters):
     #     = 1/epsilon * ( F(x+epsilon*v) - Fxold )
     # we compute Fxold at startup
     # we have to keep x so that we can compute the F(x+exps*v)
-    diffusion(x, Fxold, boundary, options, solution)
+    operators.diffusion(x, Fxold, x_old, boundary, options)
 
     v = (1. + EPS) * x
 
     # Fx = F(v)
-    diffusion(v, Fx, boundary, options, solution)
+    operators.diffusion(v, Fx, x_old, boundary, options)
 
     # r = b - A*x
     # where A*x = (Fx-Fxold)/eps
@@ -46,12 +48,12 @@ def cg(x, b, boundary, options, solution, tolerance, maxiters):
     rnew = rold
 
     if math.sqrt(rold) < tolerance:
-        return (True, 0)
+        return (True, 0, rnew)
 
     for it in range(maxiters):
         # Ap = A*p
         v = xold + EPS * p
-        diffusion(v, Fx, boundary, options, solution)
+        operators.diffusion(v, Fx, x_old, boundary, options)
 
         Ap = EPS_INV * (Fx - Fxold)
 
@@ -66,11 +68,19 @@ def cg(x, b, boundary, options, solution, tolerance, maxiters):
         rnew = r @ r
 
         if (math.sqrt(rnew) < tolerance):
-            return (True, it)
+            return (True, it, rnew)
 
         p = r + (rnew / rold) * p
         rold = rnew
 
-    print(f'ERROR: CG failed to converge after {it} iterations, '
-          f'with residual {math.sqrt(rnew)}', file=sys.stderr)
-    return (False, it)
+    return (False, it, rnew)
+
+
+def _cg(x, x_old, b, boundary, options, tolerance, maxiters):
+    converged, iters, rnew = _cg(x, x_old, b, boundary, options,
+                                 tolerance, maxiters)
+    if not converged:
+        print(f'ERROR: CG failed to converge after {iters} iterations, '
+              f'with residual {math.sqrt(rnew)}', file=sys.stderr)
+
+    return (converged, iters)
