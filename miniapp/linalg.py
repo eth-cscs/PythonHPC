@@ -4,8 +4,8 @@
 # Originally written in C++ by Ben Cumming, CSCS
 # Ported to Python by Vasileios Karakasis, CSCS
 
+import collections
 import math
-import numba
 import numpy as np
 import sys
 
@@ -15,8 +15,10 @@ import operators
 EPS = 1.0e-8
 EPS_INV = 1.0 / EPS
 
+CGStatus = collections.namedtuple('CGStatus',
+                                  ['converged', 'iters', 'residual'])
 
-@numba.jit(nopython=True, cache=True)
+
 def cg(x, x_old, b, boundary, options, tolerance, maxiters):
 
     # Initialize temporary storage
@@ -48,7 +50,7 @@ def cg(x, x_old, b, boundary, options, tolerance, maxiters):
     rnew = rold
 
     if math.sqrt(rold) < tolerance:
-        return (True, 0, rnew)
+        return CGStatus(True, 0, math.sqrt(rnew))
 
     for it in range(maxiters):
         # Ap = A*p
@@ -67,20 +69,11 @@ def cg(x, x_old, b, boundary, options, tolerance, maxiters):
         # find new norm
         rnew = r @ r
 
-        if (math.sqrt(rnew) < tolerance):
-            return (True, it, rnew)
+        residual = math.sqrt(rnew)
+        if (residual < tolerance):
+            return CGStatus(True, it, residual)
 
         p = r + (rnew / rold) * p
         rold = rnew
 
-    return (False, it, rnew)
-
-
-def _cg(x, x_old, b, boundary, options, tolerance, maxiters):
-    converged, iters, rnew = _cg(x, x_old, b, boundary, options,
-                                 tolerance, maxiters)
-    if not converged:
-        print(f'ERROR: CG failed to converge after {iters} iterations, '
-              f'with residual {math.sqrt(rnew)}', file=sys.stderr)
-
-    return (converged, iters)
+    return CGStatus(False, it, residual)

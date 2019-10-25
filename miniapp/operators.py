@@ -4,11 +4,9 @@
 # Modified by Ben Cumming, CSCS
 # Ported to Python by Vasileios Karakasis, CSCS
 
-import numba
 import numpy as np
 
 
-@numba.jit(nopython=True, cache=True)
 def diffusion(U, S, x_old, boundary, options):
     dxs = 1000. * options.dx * options.dx
     alpha = options.alpha

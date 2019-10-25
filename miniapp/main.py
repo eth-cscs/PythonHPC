@@ -10,7 +10,6 @@
 import collections
 import math
 import matplotlib
-import numba
 import numpy as np
 import os
 import sys
@@ -26,6 +25,11 @@ Discretization = collections.namedtuple(
 
 Boundary = collections.namedtuple(
     'Boundary', ['north', 'south', 'east', 'west']
+)
+
+NewtonStatus = collections.namedtuple(
+    'NewtonStatus', ['solution', 'converged', 'timestep',
+                     'iters_newton', 'iters_cg', 'status_cg']
 )
 
 
@@ -48,8 +52,7 @@ def parse_arg(v, argname, fn):
     return v
 
 
-@numba.jit(nopython=True, cache=True)
-def _timeloop(x, boundary, options, max_cg_iters, max_newton_iters, tolerance):
+def timeloop(x, boundary, options, max_cg_iters, max_newton_iters, tolerance):
     # main timeloop
 
     nx, ny = options.nx, options.ny
@@ -72,13 +75,13 @@ def _timeloop(x, boundary, options, max_cg_iters, max_newton_iters, tolerance):
                 converged = True
                 break
 
-            cg_converged, iters, _ = linalg.cg(
+            cg_status = linalg.cg(
                 deltax, x_old, b, boundary, options,
                 tolerance, max_cg_iters
             )
 
-            iters_cg += iters
-            if not cg_converged:
+            iters_cg += cg_status.iters
+            if not cg_status.converged:
                 break
 
             x -= deltax
@@ -87,19 +90,8 @@ def _timeloop(x, boundary, options, max_cg_iters, max_newton_iters, tolerance):
         if not converged:
             break
 
-    return (x, converged, iters_newton, iters_cg, timestep)
-
-
-def timeloop(x, boundary, options, max_cg_iters, max_newton_iters, tolerance):
-    x, converged, iters_newton, iters_cg, timestep = _timeloop(
-        x, boundary, options, max_cg_iters, max_newton_iters, tolerance
-    )
-
-    if not converged:
-        print(f'step {timestep} '
-              f'ERROR : nonlinear iterations failed to converge')
-
-    return (x, iters_newton, iters_cg)
+    return NewtonStatus(x, converged, timestep,
+                        iters_newton, iters_cg, cg_status)
 
 
 def main():
@@ -180,18 +172,28 @@ def main():
     iters_newton = 0
     timespent = datetime.now()
 
-    x, iters_newton, iters_cg = timeloop(
+    status = timeloop(
         x, boundary, options, max_cg_iters, max_newton_iters, tolerance
     )
+    if not status.converged:
+        cg_status = status.status_cg
+        if not cg_status.converged:
+            print(f'ERROR: CG failed to converge after {cg_status.iters} '
+                  f'iterations, with residual {cg_status.residual}',
+                  file=sys.stderr)
+
+        print(f'step {status.timestep} '
+              f'ERROR : nonlinear iterations failed to converge',
+              file=sys.stderr)
 
     # get times
     timespent = (datetime.now() - timespent).total_seconds()
     print('----------------------------------------'
           '----------------------------------------')
     print(f'simulation took {timespent} seconds')
-    print(f'{iters_cg} conjugate gradient iterations, at rate of '
-          f'{iters_cg/timespent} iters/second')
-    print(f'{iters_newton} newton iterations')
+    print(f'{status.iters_cg} conjugate gradient iterations, at rate of '
+          f'{status.iters_cg/timespent} iters/second')
+    print(f'{status.iters_newton} newton iterations')
     print(f'Goodbye!')
 
     if 'DISPLAY' not in os.environ:
