@@ -45,16 +45,18 @@ class time_region_cuda:
                                                               self._t_end)
 
 
+@numba.njit(cache=True, parallel=True)
 def gemv_v1(alpha, A, x, beta, y):
     N, M = A.shape
-    for i in range(N):
+    y_ret = np.empty(N)
+    for i in numba.prange(N):
         prod = 0.0
-        for j in range(M):
+        for j in numba.prange(M):
             prod += A[i, j]*x[j]
 
-        y[i] = alpha*prod + beta*y[i]
+        y_ret[i] = alpha*prod + beta*y[i]
 
-    return y
+    return y_ret
 
 
 def gemv_v2(alpha, A, x, beta, y):
@@ -199,13 +201,13 @@ if __name__ == '__main__':
     alpha = 0.2
     beta = 1
 
-    t_start = time.time()
-    y = kernel(alpha, A, x, beta, y_orig)
-    # y = vecadd(x, x)
-    t_end = time.time()
+    with time_region() as t_kernel:
+        y = kernel(alpha, A, x, beta, y_orig)
+        # y = vecadd(x, x)
+
     cuda.profile_stop()
 
-    print(f'Elapsed time: {t_end - t_start} s')
+    print(f'Elapsed time: {t_kernel.elapsed_time()} s')
     y_ref = alpha*(A @ x) + beta*y_orig
     # y_ref = x + x
     if not validate(y, y_ref):
