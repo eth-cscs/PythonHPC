@@ -5,6 +5,14 @@ it.
 
 The C code consists of the source and header files `cityblock.c` and `cityblock.h`. The file `cffi_cityblock.py` is used to build a `.so` file that can be imported within python.
 
+## How it works
+The idea is
+ 1. Compile the C code into a dynamical library `lib<name>.so`.
+    This library can't be imported in python.
+ 2. With CFFI, create a python-importable library that act as glue between the
+    `lib<name>.so` containing our function and python.
+ 3. Import the python-importable library in pyhton and use it!
+
 ## How to build it
 The following steps describe how to build the `.so` file:
  1. Build the `libcityblock.so` library that contains the function `cbdm`:
