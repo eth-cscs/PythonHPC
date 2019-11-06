@@ -163,8 +163,7 @@ def vecadd(x, y):
 
 
 def validate(found, expected):
-    eps = 1.e-6
-    return all(x < eps for x in np.abs(found - expected))
+    return np.allclose(found, expected)
 
 
 if __name__ == '__main__':
@@ -183,9 +182,22 @@ if __name__ == '__main__':
     version = sys.argv[2]
     try:
         kernel = globals()['gemv_' + version]
-    except NameError:
+    except KeyError:
         print(f'{sys.argv[0]}: ERROR: no such kernel version: {version}',
               file=sys.stderr)
+        versions = []
+        for name in list(globals().keys()):
+            if not name.startswith('gemv_'):
+                continue
+
+            try:
+                version = name.split('_', maxsplit=1)[1]
+            except IndexError:
+                continue
+
+            versions.append(version)
+
+        print(f'  Available versions: {", ".join(versions)}', file=sys.stderr)
         sys.exit(1)
 
     if N <= 0:
