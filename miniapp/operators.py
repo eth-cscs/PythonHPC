@@ -4,10 +4,12 @@
 # Modified by Ben Cumming, CSCS
 # Ported to Python by Vasileios Karakasis, CSCS
 
+import numba
 import numpy as np
 
 
-def diffusion(U, S, boundary, options, solution):
+@numba.njit(cache=True)
+def diffusion(U, S, x_old, boundary, options):
     dxs = 1000. * options.dx * options.dx
     alpha = options.alpha
     nx = options.nx
@@ -16,10 +18,10 @@ def diffusion(U, S, boundary, options, solution):
     bndS = boundary.south
     bndE = boundary.east
     bndW = boundary.west
-    x_old = solution.old.reshape((nx, ny))
     iend  = nx - 1
     jend  = ny - 1
 
+    x_old = x_old.reshape((nx, ny))
     U = U.reshape((nx, ny))
     S = S.reshape((nx, ny))
 
