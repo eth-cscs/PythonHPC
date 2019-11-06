@@ -5,7 +5,7 @@
 # Ported to Python by Vasileios Karakasis, CSCS
 
 import collections
-import math
+import numba
 import numpy as np
 import sys
 
@@ -19,6 +19,7 @@ CGStatus = collections.namedtuple('CGStatus',
                                   ['converged', 'iters', 'residual'])
 
 
+@numba.njit(cache=True)
 def cg(x, x_old, b, boundary, options, tolerance, maxiters):
 
     # Initialize temporary storage
@@ -49,10 +50,10 @@ def cg(x, x_old, b, boundary, options, tolerance, maxiters):
     rold = r @ r
     rnew = rold
 
-    if math.sqrt(rold) < tolerance:
-        return CGStatus(True, 0, math.sqrt(rnew))
+    if np.sqrt(rold) < tolerance:
+        return CGStatus(True, 0, np.sqrt(rnew))
 
-    for it in range(maxiters):
+    for it in range(1, maxiters + 1):
         # Ap = A*p
         v = xold + EPS * p
         operators.diffusion(v, Fx, x_old, boundary, options)
@@ -69,7 +70,7 @@ def cg(x, x_old, b, boundary, options, tolerance, maxiters):
         # find new norm
         rnew = r @ r
 
-        residual = math.sqrt(rnew)
+        residual = np.sqrt(rnew)
         if (residual < tolerance):
             return CGStatus(True, it, residual)
 

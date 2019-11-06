@@ -8,8 +8,8 @@
 #   Ported to Python by Vasileios Karakasis, CSCS
 
 import collections
-import math
 import matplotlib
+import numba
 import numpy as np
 import os
 import sys
@@ -52,6 +52,7 @@ def parse_arg(v, argname, fn):
     return v
 
 
+@numba.njit(cache=True)
 def timeloop(x, boundary, options, max_cg_iters, max_newton_iters, tolerance):
     # main timeloop
 
@@ -70,7 +71,7 @@ def timeloop(x, boundary, options, max_cg_iters, max_newton_iters, tolerance):
         converged = False
         for it in range(max_newton_iters):
             operators.diffusion(x, b, x_old, boundary, options)
-            residual = math.sqrt(b @ b)
+            residual = np.sqrt(b @ b)
             if residual < tolerance:
                 converged = True
                 break
