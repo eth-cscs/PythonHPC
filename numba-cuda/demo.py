@@ -65,6 +65,7 @@ def gemv_v2(alpha, A, x, beta, y):
 
 @cuda.jit('void(float64, Array(float64, 2, "F"), Array(float64, 1, "F"), '
           'float64, Array(float64, 1, "F"))')
+# @cuda.jit
 def _gemv_cuda(alpha, A, x, beta, y):
     i = cuda.grid(1)
     N, M = A.shape
