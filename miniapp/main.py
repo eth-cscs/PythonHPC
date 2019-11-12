@@ -8,8 +8,8 @@
 #   Ported to Python by Vasileios Karakasis, CSCS
 
 import collections
-import math
 import matplotlib
+import numba
 import numpy as np
 import os
 import sys
@@ -27,7 +27,10 @@ Boundary = collections.namedtuple(
     'Boundary', ['north', 'south', 'east', 'west']
 )
 
-Solution = collections.namedtuple('Solution', ['old', 'new'])
+NewtonStatus = collections.namedtuple(
+    'NewtonStatus', ['solution', 'converged', 'timestep',
+                     'iters_newton', 'iters_cg', 'status_cg']
+)
 
 
 def usage():
@@ -47,6 +50,49 @@ def parse_arg(v, argname, fn):
         sys.exit(1)
 
     return v
+
+
+@numba.njit(cache=True)
+def timeloop(x, boundary, options, max_cg_iters, max_newton_iters, tolerance):
+    # main timeloop
+
+    nx, ny = options.nx, options.ny
+
+    # initialize fields
+    b = np.zeros(nx*ny)
+    deltax = np.zeros(nx*ny)
+
+    nt = options.nt
+    iters_newton = 0
+    iters_cg = 0
+
+    for timestep in range(1, nt+1):
+        x_old = np.copy(x)
+        converged = False
+        for it in range(max_newton_iters):
+            operators.diffusion(x, b, x_old, boundary, options)
+            residual = np.sqrt(b @ b)
+            if residual < tolerance:
+                converged = True
+                break
+
+            cg_status = linalg.cg(
+                deltax, x_old, b, boundary, options,
+                tolerance, max_cg_iters
+            )
+
+            iters_cg += cg_status.iters
+            if not cg_status.converged:
+                break
+
+            x -= deltax
+
+        iters_newton += it + 1
+        if not converged:
+            break
+
+    return NewtonStatus(x, converged, timestep,
+                        iters_newton, iters_cg, cg_status)
 
 
 def main():
@@ -94,13 +140,8 @@ def main():
           f'tolerance {tolerance}')
     print(f'========================================================================')
 
-    # initialize fields
-    x_new = np.zeros(nx*ny)
-    x_old = np.zeros(nx*ny)
-    solution = Solution(x_old, x_new)
-
-    b = np.zeros(nx*ny)
-    deltax = np.zeros(nx*ny)
+    # Solution field
+    x = np.zeros(nx*ny)
 
     # set dirichlet boundary conditions to 0 all around
     bndN  = np.zeros(nx)
@@ -119,11 +160,11 @@ def main():
     xc = 1.0 / 4.0
     yc = (ny - 1) * dx / 4
     radius = min(xc, yc) / 2.0
-    x_new = x_new.reshape((nx, ny))
-    x_new[(X - xc) ** 2 + (Y - yc) ** 2 < radius * radius] = 0.1
+    x = x.reshape((nx, ny))
+    x[(X - xc) ** 2 + (Y - yc) ** 2 < radius * radius] = 0.1
 
     # restore x_new's shape
-    x_new = x_new.flatten()
+    x = x.flatten()
 
     flops_bc = 0
     flops_diff = 0
@@ -132,41 +173,28 @@ def main():
     iters_newton = 0
     timespent = datetime.now()
 
-    # main timeloop
-    for timestep in range(1, nt+1):
-        np.copyto(x_old, x_new)
-        converged = False
-        for it in range(max_newton_iters):
-            operators.diffusion(x_new, b, boundary, options, solution)
-            residual = math.sqrt(b @ b)
-            if residual < tolerance:
-                converged = True
-                break
+    status = timeloop(
+        x, boundary, options, max_cg_iters, max_newton_iters, tolerance
+    )
+    if not status.converged:
+        cg_status = status.status_cg
+        if not cg_status.converged:
+            print(f'ERROR: CG failed to converge after {cg_status.iters} '
+                  f'iterations, with residual {cg_status.residual}',
+                  file=sys.stderr)
 
-            cg_convered, iters = linalg.cg(
-                deltax, b, boundary, options, solution,
-                tolerance, max_cg_iters)
-
-            iters_cg += iters
-            if not cg_convered:
-                break
-
-            x_new -= deltax
-
-        iters_newton += it + 1
-        if not converged:
-            print(f'step {timestep} '
-                  f'ERROR : nonlinear iterations failed to converge')
-            break
+        print(f'step {status.timestep} '
+              f'ERROR : nonlinear iterations failed to converge',
+              file=sys.stderr)
 
     # get times
     timespent = (datetime.now() - timespent).total_seconds()
     print('----------------------------------------'
           '----------------------------------------')
     print(f'simulation took {timespent} seconds')
-    print(f'{iters_cg} conjugate gradient iterations, at rate of '
-          f'{iters_cg/timespent} iters/second')
-    print(f'{iters_newton} newton iterations')
+    print(f'{status.iters_cg} conjugate gradient iterations, at rate of '
+          f'{status.iters_cg/timespent} iters/second')
+    print(f'{status.iters_newton} newton iterations')
     print(f'Goodbye!')
 
     if 'DISPLAY' not in os.environ:
@@ -181,7 +209,7 @@ def main():
     outfile = f'output_{nx}x{ny}_t={t}_steps={nt}.png'
 
     print(f'generating solution figure in "{outfile}" ...')
-    ax.contourf(X, Y, x_new.reshape((nx, ny)), V, alpha=.75, cmap='jet')
+    ax.contourf(X, Y, x.reshape((nx, ny)), V, alpha=.75, cmap='jet')
     ax.axes.set_aspect('equal')
     fig.savefig(outfile, dpi=72)
 
