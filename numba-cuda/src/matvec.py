@@ -3,46 +3,11 @@ import numba
 import numba.cuda as cuda
 import numpy as np
 import sys
-import time
+from timing import time_region, time_region_cuda
 
 
 def print_usage():
     print(f'Usage: {sys.argv[0]} <arraydim> <version>', file=sys.stderr)
-
-
-class time_region:
-    def __init__(self, time_offset=0):
-        self._time_off = time_offset
-
-    def __enter__(self):
-        self._t_start = time.time()
-        return self
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        self._t_end = time.time()
-
-    def elapsed_time(self):
-        return self._time_off + (self._t_end - self._t_start)
-
-
-class time_region_cuda:
-    def __init__(self, time_offset=0, cuda_stream=0):
-        self._t_start = cuda.event(timing=True)
-        self._t_end = cuda.event(timing=True)
-        self._time_off = time_offset
-        self._cuda_stream = cuda_stream
-
-    def __enter__(self):
-        self._t_start.record(self._cuda_stream)
-        return self
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        self._t_end.record(self._cuda_stream)
-        self._t_end.synchronize()
-
-    def elapsed_time(self):
-        return self._time_off + 1.e-3*cuda.event_elapsed_time(self._t_start,
-                                                              self._t_end)
 
 
 @numba.njit(cache=True, parallel=True)
@@ -65,6 +30,7 @@ def gemv_v2(alpha, A, x, beta, y):
 
 @cuda.jit('void(float64, Array(float64, 2, "F"), Array(float64, 1, "F"), '
           'float64, Array(float64, 1, "F"))')
+# @cuda.jit
 def _gemv_cuda(alpha, A, x, beta, y):
     i = cuda.grid(1)
     N, M = A.shape
@@ -92,7 +58,7 @@ def _gemv_cuda_shared(alpha, A, x, beta, y):
     lx = cuda.shared.array(shape=BLOCK_SIZE, dtype=numba.float64)
     bsize = cuda.blockDim.x
     tid = cuda.threadIdx.x
-    num_blocks = M // bsize
+    num_blocks = cuda.gridDim.x
 
     prod = 0.0
     for b in range(num_blocks):
@@ -115,19 +81,28 @@ def gemv_v3(alpha, A, x, beta, y):
         d_y = cuda.to_device(y)
 
     N = A.shape[0]
-    num_blocks = N // BLOCK_SIZE
+    NB = N // BLOCK_SIZE
     if N % BLOCK_SIZE:
-        num_blocks += 1
+        NB += 1
 
     with time_region_cuda() as t_kernel:
-        _gemv_cuda[num_blocks, BLOCK_SIZE](alpha, d_A, d_x, beta, d_y)
+        _gemv_cuda[NB, BLOCK_SIZE](alpha, d_A, d_x, beta, d_y)
 
     with time_region_cuda(t_xfer.elapsed_time()) as t_xfer:
         y_ret = d_y.copy_to_host()
 
     print(f'  CUDA transfer times: {t_xfer.elapsed_time()}')
     print(f'  CUDA kernel time: {t_kernel.elapsed_time()}')
+    print(f'  Consumed memory bandwidth: '
+          f'{1e-9*8*N*(N+2)/t_kernel.elapsed_time()} GB/s')
     return y_ret
+
+
+def gemv_v4(alpha, A, x, beta, y):
+    global _gemv_cuda
+
+    _gemv_cuda = _gemv_cuda_shared
+    return gemv_v3(alpha, A, x, beta, y)
 
 
 @cuda.jit
