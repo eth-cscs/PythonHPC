@@ -1,4 +1,4 @@
-# This repository contains the material used for the *High-Performance Computing with Python* course, organized by CSCS on 11-13 November 2019
+# This repository contains the material used for the `High-Performance Computing with Python` course, organized at CSCS on 11-13 November 2019.
 
 ## The course covers the following topics:
 - Interactive parallel programming with IPython
