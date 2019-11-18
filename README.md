@@ -29,7 +29,7 @@
 * (09:00 - 09:30) [Just in time compilation with Numba (2)](numba)
 * (09:30 - 10:15) [Dask: task graphs](dask)
 * (10:15 - 10:30) Coffee break
-* (10:30 - 11:40) [Dask: data structures](dask)
+* (10:30 - 11:40) [Dask: data structures; distributed](dask)
 * (11:40 - 12:00) Visit to the Machine Room
 * (12:00 - 13:00) Lunch
 * (13:00 - 14:00) [Language bindings: F2PY](f2py)
