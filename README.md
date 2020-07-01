@@ -17,10 +17,11 @@
 
 ## Agenda
 ### Monday, July 6, 2020
-* (09:00 - 09:45) Introduction to Python for HPC
+* (09:00 - 09:10) Welcome 
+* (09:10 - 09:45) Introduction to Python for HPC
 * (09:45 - 10:00) Python distributions and tools for HPC
 * (10:00 - 10:15) Break
-* (10:15 - 11:00) Python tools for HPC
+* (10:15 - 11:00) Introduction to JupyterLab
 * (11:00 - 12:00) Vectorization: NumPy/SciPy stack
 * (12:00 - 13:00) Lunch break
 * (13:00 - 13:30) Profiling and memory management in Python
