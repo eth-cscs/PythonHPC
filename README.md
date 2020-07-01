@@ -1,12 +1,12 @@
-# This repository contains the material used for the `High-Performance Computing with Python` course, organized at CSCS on 11-13 November 2019.
+# This repository contains the material used for the `High-Performance Computing with Python` course, organized at CSCS on 6-8 July 2020.
 
 ## The course covers the following topics:
 - Interactive parallel programming with IPython
 - Profiling and optimization
-- High-performance NumPy
+- Vectorization with NumPy and the SciPy stack
 - Just-in-time compilation with Numba
 - Distributed-memory parallel programming with Python and MPI
-- Bindings to other programming languages and HPC libraries
+- Bindings to other programming languages
 - Interfaces to GPUs
 
 ## Course Instructors:
@@ -16,37 +16,36 @@
 - Dr. Vasileios Karakasis (Group Lead, CSCS)
 
 ## Agenda
-### Monday, November 11, 2019
-* (10:00 - 10:45) [Introduction to HPC and Python for HPC](intro)
-* (10:45 - 12:00) [Python distributions and tools for HPC](intro)
-* (12:00 - 13:00) Lunch
-* (13:00 - 14:45) [Vectorization: NumPy/SciPy stack](numpy)
-* (14:45 - 15:00) Coffee break
-* (15:00 - 15:45) [Profiling and memory management in Python](profiling)
-* (15:45 - 17:00) [Just in time compilation with Numba (1)](numba)
+### Monday, July 6, 2020
+* (09:00 - 09:45) Introduction to Python for HPC
+* (09:45 - 10:00) Python distributions and tools for HPC
+* (10:00 - 10:15) Break
+* (10:15 - 11:00) Python tools for HPC
+* (11:00 - 12:00) Vectorization: NumPy/SciPy stack
+* (12:00 - 13:00) Lunch break
+* (13:00 - 13:30) Profiling and memory management in Python
+* (13:30 - 14:00) Just in time compilation with Numba (Part 1)
+* (14:00 - 14:15) Break
+* (14:15 - 15:00) Dask: task graphs
+* (15:00 - 16:00) Dask: data structures
 
-### Tuesday, November 12, 2019
-* (09:00 - 09:30) [Just in time compilation with Numba (2)](numba)
-* (09:30 - 10:15) [Dask: task graphs](dask)
-* (10:15 - 10:30) Coffee break
-* (10:30 - 11:40) [Dask: data structures; distributed](dask)
-* (11:40 - 12:00) Visit to the Machine Room
+### Tuesday, July 7, 2020
+* (09:00 - 10:00) Just in time compilation with Numba (Part 2)
+* (10:00 - 10:15) Break
+* (10:15 - 12:00) Optimizing code with Cython
 * (12:00 - 13:00) Lunch
-* (13:00 - 14:00) [Language bindings: F2PY](f2py)
-* (14:00 - 14:45) [Language bindings: CFFI (1)](cffi)
-* (14:45 - 15:00) Coffee break
-* (15:00 - 15:30) [Language bindings: CFFI (2)](cffi)
-* (15:30 - 16:00) [Language bindings: other solutions](cffi)
-* (16:00 - 17:00) [Optimizing code with Cython (1)](cython)
+* (13:00 - 14:00) Language bindings: F2PY
+* (14:00 - 14:15) Break
+* (14:15 - 15:00) Language bindings: CFFI
+* (15:00 - 16:00) Q&A
 
-### Wednesday, November 13, 2019
-* (09:00 - 10:15) [Optimizing code with Cython (2)](cython)
-* (10:15 - 10:30) Coffee break
-* (10:30 - 11:00) [Fast evaluation of array expressions with NumExpr](numexpr)
-* (11:00 - 12:00) [Just in time compilation with Numba: GPU (1)](numba-cuda)
-* (12:00 - 13:00) Lunch
-* (13:00 - 13:30) [Just in time compilation with Numba: GPU (2)](numba-cuda)
-* (13:30 - 14:45) [Computing on the GPU with CuPy](CuPy)
-* (14:45 - 15:00) Coffee break
-* (15:00 - 15:45) [Parallelizing workflows with IPyParallel and MPI4Py](ipyparallel_mpi4py)
-* (15:45 - 16:00) Conclusions
+### Wednesday, July 8, 2020
+* (09:00 - 10:00) Just in time compilation with Numba: GPU (Part 1)
+* (10:00 - 10:15) Break
+* (10:15 - 12:00) Just in time compilation with Numba: GPU (Part 2)
+* (12:00 - 13:00) Lunch break
+* (13:00 - 14:00) Computing on the GPU with CuPy
+* (14:00 - 14:15) Break
+* (14:15 - 15:00) Parallelizing workflows with IPyParallel and MPI4Py
+* (15:00 - 15:15) Conclusions
+* (15:15 - 16:00) Q&A
