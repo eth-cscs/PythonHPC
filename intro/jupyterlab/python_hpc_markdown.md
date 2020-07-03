@@ -1,5 +1,4 @@
-# TWR, 9 November 2019 
-# This is a markdown file to demonstrate Shift Enter
+# This is an example markdown file to demonstrate Shift Enter
 
 Here is some regular text.
 
