@@ -11,7 +11,7 @@ def euclidean_broadcast(x, y):
 
     Ouput:
     (N, N) Euclidean square distance matrix:
-    r_ij = x_ij^2 - y_ij^2
+    r_ij = (x_ij - y_ij)^2
     """
     diff = x[:, np.newaxis, :] - y[np.newaxis, :, :]
 
@@ -24,7 +24,7 @@ if __name__ == "__main__":
     x = 10. * np.random.random([nsamples, nfeat])
 
     lp = LineProfiler()
-    lp_wrapper = lp(euclidean_broadcast)(x,x)
+    lp(euclidean_broadcast)(x,x)
     lp.print_stats()
 
 

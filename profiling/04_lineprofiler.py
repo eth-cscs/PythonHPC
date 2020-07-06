@@ -11,7 +11,7 @@ def euclidean_trick(x, y):
     
     Ouput:
     (N, N) Euclidean square distance matrix:
-    r_ij = x_ij^2 - y_ij^2
+    r_ij = (x_ij - y_ij)^2
     """
     x2 = np.einsum('ij,ij->i', x, x)[:, np.newaxis]
     y2 = np.einsum('ij,ij->i', y, y)[np.newaxis, :]
@@ -27,7 +27,7 @@ if __name__ == "__main__":
     x = 10. * np.random.random([nsamples, nfeat])
 
     lp = LineProfiler()
-    lp_wrapper = lp(euclidean_trick)(x,x)
+    lp(euclidean_trick)(x,x)
     lp.print_stats()
 
 

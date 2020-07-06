@@ -12,7 +12,7 @@ def euclidean_broadcast(x, y):
 
     Ouput:
     (N, N) Euclidean square distance matrix:
-    r_ij = x_ij^2 - y_ij^2
+    r_ij = (x_ij - y_ij)^2
     """
     diff = x[:, np.newaxis, :] - y[np.newaxis, :, :]
 
