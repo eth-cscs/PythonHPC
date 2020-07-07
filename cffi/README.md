@@ -1,19 +1,20 @@
-# Python Binding with cffi a Cityblock Distance Matrix function written in C
+# Python Binding with cffi: a Cityblock Distance Matrix function written in C
 
 Here we implement a C function to compute the Cityblock distance matrix and use cffi to write a python binding to
 it.
 
 The C code consists of the source and header files `cityblock.c` and `cityblock.h`. The file `cffi_cityblock.py` is used to build a `.so` file that can be imported within python.
 
-## How it works
+## `lib-version`
+### How it works
 The idea is
  1. Compile the C code into a dynamical library `lib<name>.so`.
     This library can't be imported in python.
- 2. With CFFI, create a python-importable library that act as glue between the
+ 2. With CFFI, create a python-importable library that acts as glue between the
     `lib<name>.so` containing our function and python.
  3. Import the python-importable library in pyhton and use it!
 
-## How to build it
+### How to build it
 The following steps describe how to build the `.so` file:
  1. Build the `libcityblock.so` library that contains the function `cbdm`:
     ```bash
@@ -27,8 +28,8 @@ The following steps describe how to build the `.so` file:
     ```bash
     python cffi_cityblock.py
     ```
-    This will first generate the file `_cityblock.c` that contains the C-code that act as glue between our function on `cityblock.c` and python.
-    This file is then compiled into `_cityblock.cpython-36m-x86_64-linux-gnu.so` which can be imported in python.
+    This will first generate the file `_cityblock.c` that contains the C-code that acts as glue between our function on `cityblock.c` and python.
+    This code is then compiled into `_cityblock.cpython-36m-x86_64-linux-gnu.so` which can be imported in python.
 
 All these steps are put together on the `Makefile` file. Just run
 ```bash
@@ -36,10 +37,13 @@ make pylib
 ```
 to build the libraries.
 
+## `code-version`
+No need to compile the library. Run only `python cffi_cityblock.py`.
+
 ## Importing and using the function within python    
 The script `test_cityblock.py` shows how to import and work with the C function within Python.
 
->>The python-importable `.so` file is linked against `libcityblock.so`.
+>   The python-importable `.so` file is linked against `libcityblock.so`.
     Because of this, at run time, it is necessary to export the directory where the library `libcityblock.so` is,
     to the `LD_LIBRARY_PATH`. For a quick test, if the library is on
     the same directory where the script will be run, the following command `export LD_LIBRARY_PATH=$PWD:$LD_LIBRARY_PATH` wil do it.
