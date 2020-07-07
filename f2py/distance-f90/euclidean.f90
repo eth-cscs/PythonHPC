@@ -12,7 +12,7 @@
       integer :: i, j, k
       double precision :: tmp
   
-!$OMP PARALLEL DO
+!$OMP PARALLEL DO PRIVATE(tmp)
       do i = 1, nsamples
           do j = 1, nsamples
               tmp = 0.0
