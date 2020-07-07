@@ -4,7 +4,7 @@ from scipy.spatial.distance import cdist
 from metrics.cbdm import cityblock_distance_matrix
 
 
-nsamples, nfeat = (5000, 50)
+nsamples, nfeat = (12000, 50)
 x = 10. * np.random.random([nsamples, nfeat])
 
 start = time.time()
@@ -16,4 +16,4 @@ start = time.time()
 cbdm_np = cdist(x, x, 'cityblock')
 print("scipy: %.2f seconds" % (time.time() - start))
 
-print(np.abs(cbdm_f90 - cbdm_np).max())
+print('diff : %.2e' % np.abs(cbdm_f90 - cbdm_np).max())
