@@ -1,4 +1,4 @@
-idean_broadcast(x, y):
+def euclidean_broadcast(x, y):
     """Euclidean square distance matrix.
     
     Inputs:
