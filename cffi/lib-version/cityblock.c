@@ -2,7 +2,7 @@
 
 
 void cbdm(double *a, double *b, double *r, int num_rows, int num_cols) {
-    double _r;
+    double _r = 0.0;
 
 #pragma omp parallel for reduction (+:_r)
     for(int i = 0; i < num_rows; i++) {

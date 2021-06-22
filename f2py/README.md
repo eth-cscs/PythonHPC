@@ -1,7 +1,7 @@
 # Implementation in Fortran90 of the Euclidean and Cityblock Distance Matrices
 
 The code is under `./distance-f90` and `./distance-f90-pythonized`. Both have the same algorithms, but we write the code of `./distance-f90-pythonized` in such a way that F2PY is able to produce pythonic functions (with optional arguments and returning values, opposed to Fortran subroutines).
-There are the files `cityblock.f90`, `euclidean.f90`, which are the sources, and `setup.py`, which can be used to compile the code into `.so` files that can be imported in python.
+The files `cityblock.f90`, `euclidean.f90`are the sources. `setup.py` can be used to compile the code into `.so` files that can be imported in python.
 
 ## Build with `setup.py`
 The following command can be used to build the `.so` files
