@@ -4,11 +4,11 @@ from line_profiler import LineProfiler
 
 def euclidean_trick(x, y):
     """Euclidean square distance matrix.
-    
+
     Inputs:
     x: (N, m) numpy array
     y: (N, m) numpy array
-    
+
     Ouput:
     (N, N) Euclidean square distance matrix:
     r_ij = (x_ij - y_ij)^2
@@ -24,10 +24,9 @@ def euclidean_trick(x, y):
 if __name__ == "__main__":
     nsamples = 2000
     nfeat = 50
-    x = 10. * np.random.random([nsamples, nfeat])
+    rng = np.random.default_rng()
+    x = 10. * rng.random((nsamples, nfeat))
 
     lp = LineProfiler()
-    lp(euclidean_trick)(x,x)
+    lp(euclidean_trick)(x, x)
     lp.print_stats()
-
-

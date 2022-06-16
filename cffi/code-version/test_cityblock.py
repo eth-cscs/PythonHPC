@@ -8,7 +8,8 @@ from _cityblock.lib import cbdm
 nsamples = 12000
 nfeat = 50
 
-x = np.random.random([nsamples, nfeat])
+rng = np.random.default_rng()
+x = rng.random((nsamples, nfeat))
 r = np.empty((nsamples, nsamples))
 
 ffi = FFI()
