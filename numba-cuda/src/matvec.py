@@ -182,8 +182,9 @@ if __name__ == '__main__':
         )
         sys.exit(1)
 
-    A = np.asarray(np.random.rand(N, N), order='F')
-    x = np.random.rand(N)
+    rng = np.random.default_rng()
+    A = np.asarray(rng.random((N, N)), order='F')
+    x = rng.random(N)
     y_orig = np.ones(N)
     alpha = 0.2
     beta = 1

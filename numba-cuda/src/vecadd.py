@@ -62,8 +62,9 @@ if __name__ == '__main__':
         )
         sys.exit(1)
 
-    x = np.random.rand(N)
-    y = np.random.rand(N)
+    rng = np.random.default_rng()
+    x = rng.random(N)
+    y = rng.random(N)
     with time_region() as t_gpu:
         z = vecadd(x, y)
 
