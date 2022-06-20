@@ -18,7 +18,7 @@ def euclidean_numpy(x, y):
     x2 = np.einsum('ij,ij->i', x, x)[:, np.newaxis]
     y2 = np.einsum('ij,ij->i', y, y)[:, np.newaxis].T
 
-    xy = np.dot(x, y.T)
+    xy = x @ y.T
 
     return np.abs(x2 + y2 - 2. * xy)
 
