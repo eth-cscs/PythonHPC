@@ -4,12 +4,13 @@ from scipy.spatial.distance import cdist
 from metrics.cbdm import cityblock_distance_matrix
 
 
-nsamples, nfeat = (12000, 50)
-x = 10. * np.random.random([nsamples, nfeat])
+nsamples, nfeats = (12000, 50)
+rng = np.random.default_rng()
+x = 10. * rng.random([nsamples, nfeats])
 cbdm_f90 = np.empty([nsamples, nsamples], order='F')
 
 start = time.time()
-cityblock_distance_matrix(x.T, x.T, nsamples, nfeat, cbdm_f90)
+cityblock_distance_matrix(x.T, x.T, nsamples, nfeats, cbdm_f90)
 print("f90  : %.2f seconds" % (time.time() - start))
 
 start = time.time()

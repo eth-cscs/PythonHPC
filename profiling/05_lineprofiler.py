@@ -21,10 +21,9 @@ def euclidean_broadcast(x, y):
 if __name__ == "__main__":
     nsamples = 2000
     nfeat = 50
-    x = 10. * np.random.random([nsamples, nfeat])
+    rng = np.random.default_rng()
+    x = 10. * rng.random((nsamples, nfeat))
 
     lp = LineProfiler()
-    lp(euclidean_broadcast)(x,x)
+    lp(euclidean_broadcast)(x, x)
     lp.print_stats()
-
-

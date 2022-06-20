@@ -10,7 +10,7 @@ def ccityblock(x, y):
     Input:
     x: (N, m) numpy array
     y: (N, m) numpy array
-    
+
     Ouput:
     (N, N) Cityblock distance matrix:
     r_ij = abs(x_ij - y_ij)
@@ -31,6 +31,7 @@ def ccityblock(x, y):
 
 nsamples = 2000
 nfeat = 50
-x = np.random.random([nsamples, nfeat])
+rng = np.random.default_rng()
+x = rng.random((nsamples, nfeat))
 
 print((ccityblock(x, x) - cdist(x, x, 'cityblock')).max())
