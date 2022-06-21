@@ -1,4 +1,4 @@
-Example that demonstrate wrapping the C++11 standard library random number generation utilities using Cython.
+Example that demonstrates wrapping the C++11 standard library random number generation utilities using Cython.
 
 Cythonize with `cythonize -i -3 pi_mc.pyx`.
 
