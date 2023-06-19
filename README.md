@@ -1,4 +1,4 @@
-# This repository contains the material used for the course [High-Performance Computing with Python], organized at CSCS on 21-23 June 2022
+# This repository contains the material used for the course [High-Performance Computing with Python], organized at CSCS on 21-23 June 2023
 
 ## The course covers the following topics:
 - Vectorization with NumPy and the SciPy stack
