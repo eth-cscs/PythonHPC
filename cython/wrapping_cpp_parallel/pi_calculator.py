@@ -10,4 +10,4 @@ if __name__ == '__main__':
         exit(-1)
 
     pi = pi_mc(int(sys.argv[1]))
-    print(f'PI is: {pi:.5f}')
+    print(f'PI is: {pi:.10f}')

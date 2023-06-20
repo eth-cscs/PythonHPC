@@ -4,12 +4,10 @@
 
 from cython cimport boundscheck, wraparound, nogil
 from mt_random cimport mt19937, uniform_real_distribution
-from cython.operator cimport dereference
-
 
 from cython.parallel cimport parallel, prange
 from openmp cimport omp_get_thread_num
-from libc.stdio cimport fprintf, stderr
+from libc.stdio cimport printf
 
 @boundscheck(False)
 @wraparound(False)
@@ -19,12 +17,12 @@ cpdef double pi_mc(long long n=1000):
     cdef long long i
     cdef double x, y
     cdef uniform_real_distribution[double] dist = uniform_real_distribution[double](0.0,1.0)
-    cdef mt19937 *gen
+    cdef mt19937 gen
 
     with nogil, parallel():
-        gen = new mt19937(omp_get_thread_num())
+        gen = mt19937(omp_get_thread_num())
         for i in prange(n):
-            x, y = dist(dereference(gen)), dist(dereference(gen))
+            x, y = dist(gen), dist(gen)
             if x * x + y * y <= 1.0:
                 in_circle += 1
 
