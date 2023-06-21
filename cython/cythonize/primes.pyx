@@ -14,7 +14,7 @@ cpdef bint is_prime(int n):
     elif n == 2:
         return False
     else:
-        for i in range(2, <int>ceil(sqrt(n))):
+        for i in range(1, <int>ceil(sqrt(n))):
             if n % i == 0:
                 return False
 
