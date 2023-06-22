@@ -4,7 +4,7 @@
 
 bool is_prime(int n) {
     if (n <= 1)
-        return true;
+        return false;
 
     int n_sqrt = (int)(sqrt(n));
 
